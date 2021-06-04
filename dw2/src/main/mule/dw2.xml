@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="efe05251-66b7-46a2-b3ed-212059e94149" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="620abd26-7669-4ad3-8eb6-aab5c85e35ef" >
+		<file:connection workingDir="C:\" />
+	</file:config>
+	<flow name="dw2Flow" doc:id="6b7fe477-1f4f-4ab7-a256-00ec35c1cf66" >
+		<http:listener doc:name="Listener" doc:id="0c3c373d-8ad0-4f5d-bc03-caaea305b1c1" config-ref="HTTP_Listener_config" path="/dw2"/>
+		<file:read doc:name="Read" doc:id="6252dd07-74ab-4cc7-aeb0-868775e09315" config-ref="File_Config" path="C:\Users\sunil.d.bansal\Desktop\Minput\sunil.json.txt"/>
+		<ee:transform doc:name="Transform Message" doc:id="430df9a8-2c92-489a-bd50-e7c0d5cb96a9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload splitBy ";" map ((Item,Index) -> Item splitBy "=") reduce (
+	(Item,accumulator={}) -> accumulator ++ (Item[0]): Item[1]
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f2f91601-b16a-49b7-84cc-edac81a8c383" message="#[payload]"/>
+	</flow>
+</mule>
